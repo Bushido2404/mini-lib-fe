@@ -14,6 +14,11 @@ export const load: PageServerLoad = async ({ cookies }) => {
 		const loans = await loansApi.getAll(token);
 		return { loans };
 	} catch (error) {
+		if ((error as Error).message === 'Session expired') {
+			cookies.delete('access_token', { path: '/' });
+			cookies.delete('user', { path: '/' });
+			redirect(302, '/login');
+		}
 		return { loans: [], error: (error as Error).message };
 	}
 };

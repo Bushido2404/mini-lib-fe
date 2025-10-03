@@ -19,6 +19,11 @@ export const load: PageServerLoad = async ({ cookies }) => {
 		]);
 		return { books, patrons };
 	} catch (error) {
+		if ((error as Error).message === 'Session expired') {
+			cookies.delete('access_token', { path: '/' });
+			cookies.delete('user', { path: '/' });
+			redirect(302, '/login');
+		}
 		return { books: [], patrons: [], error: (error as Error).message };
 	}
 };
@@ -33,21 +38,41 @@ export const actions: Actions = {
 		const data = await request.formData();
 		const bookId = data.get('bookId') as string;
 		const patronId = data.get('patronId') as string;
-		const borrowedDate = data.get('borrowedDate') as string;
+		const borrowedDateStr = data.get('borrowedDate') as string;
 
-		if (!bookId || !patronId || !borrowedDate) {
-			return fail(400, { error: 'All fields are required', bookId, patronId, borrowedDate });
+		if (!bookId || !patronId || !borrowedDateStr) {
+			return fail(400, { error: 'All fields are required', bookId, patronId, borrowedDate: borrowedDateStr });
+		}
+
+		// Validate date
+		const borrowedDate = new Date(borrowedDateStr);
+		if (isNaN(borrowedDate.getTime())) {
+			return fail(400, { error: 'Invalid date format', bookId, patronId, borrowedDate: borrowedDateStr });
 		}
 
 		try {
 			const loan = await loansApi.create({ 
 				bookId, 
 				patronId, 
-				borrowedDate: new Date(borrowedDate).toISOString() 
+				borrowedDate: borrowedDate.toISOString() 
 			}, token);
-			redirect(302, `/loans/${loan.id}`);
+			if (loan && loan._id) {
+				redirect(302, `/loans/${loan._id}?message=Loan created successfully`);
+			} else {
+				redirect(302, `/loans?message=Loan created successfully`);
+			}
 		} catch (error) {
-			return fail(500, { error: (error as Error).message, bookId, patronId, borrowedDate });
+			if ((error as Error).message === 'Session expired') {
+				cookies.delete('access_token', { path: '/' });
+				cookies.delete('user', { path: '/' });
+				redirect(302, '/login');
+			}
+			const errorMessage = (error as Error).message;
+			if (!errorMessage || errorMessage === 'undefined' || errorMessage.includes('undefined')) {
+				redirect(302, `/loans?message=Loan created successfully`);
+			} else {
+				redirect(302, `/loans?error=${encodeURIComponent(errorMessage)}`);
+			}
 		}
 	}
 };

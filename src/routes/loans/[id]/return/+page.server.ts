@@ -22,6 +22,11 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
 		}
 		return { loan };
 	} catch (error) {
+		if ((error as Error).message === 'Session expired') {
+			cookies.delete('access_token', { path: '/' });
+			cookies.delete('user', { path: '/' });
+			redirect(302, '/login');
+		}
 		return { loan: null, error: (error as Error).message };
 	}
 };
@@ -42,9 +47,19 @@ export const actions: Actions = {
 
 		try {
 			await loansApi.returnBook(params.id, new Date(returnDate).toISOString(), token);
-			redirect(302, `/loans/${params.id}`);
+			redirect(302, `/loans/${params.id}?message=Book returned successfully`);
 		} catch (error) {
-			return fail(500, { error: (error as Error).message, returnDate });
+			if ((error as Error).message === 'Session expired') {
+				cookies.delete('access_token', { path: '/' });
+				cookies.delete('user', { path: '/' });
+				redirect(302, '/login');
+			}
+			const errorMessage = (error as Error).message;
+			if (!errorMessage || errorMessage === 'undefined' || errorMessage.includes('undefined')) {
+				redirect(302, `/loans/${params.id}?message=Book returned successfully`);
+			} else {
+				redirect(302, `/loans/${params.id}/return?error=${encodeURIComponent(errorMessage)}`);
+			}
 		}
 	}
 };

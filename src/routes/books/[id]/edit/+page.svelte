@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import type { Book } from '$lib/api';
+	import type { Book } from '$lib/interfaces';
 
 	let { data, form } = $props();
 	const book: Book = data.book;
@@ -11,7 +11,7 @@
 <div class="space-y-6">
 	<div class="flex items-center justify-between">
 		<h1 class="text-3xl font-bold text-gray-900">Edit Book</h1>
-		<a href="/books/{book.id}" class="inline-flex items-center rounded-md bg-gray-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-500">
+		<a href="/books/{book._id}" class="inline-flex items-center rounded-md bg-gray-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-500">
 			Back to Book
 		</a>
 	</div>
@@ -94,7 +94,7 @@
 			</div>
 
 			<div class="flex justify-end space-x-3">
-				<a href="/books/{book.id}" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+				<a href="/books/{book._id}" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
 					Cancel
 				</a>
 				<button

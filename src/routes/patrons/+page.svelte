@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import type { Patron } from '$lib/interfaces';
 	import { filterPatrons } from '$lib/api/patron';
+	import { Alert, Button, Input, Card, Notification } from '$lib/components';
 
 	let { data } = $props();
 	const allPatrons: Patron[] = data.patrons;
@@ -23,70 +24,56 @@
 </script>
 
 <div class="space-y-6">
+	<Notification />
+	
 	{#if data.error}
-		<div class="rounded-md bg-red-50 p-4">
-			<div class="flex">
-				<svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-					<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
-				</svg>
-				<div class="ml-3">
-					<h3 class="text-sm font-medium text-red-800">Error loading patrons</h3>
-					<p class="mt-1 text-sm text-red-700">{data.error}</p>
-				</div>
-			</div>
-		</div>
+		<Alert variant="error" title="Error loading patrons">
+			{data.error}
+		</Alert>
 	{/if}
+	
 	<div class="flex items-center justify-between">
 		<h1 class="text-3xl font-bold text-gray-900">Patrons</h1>
-		<a 
-			href="/patrons/create" 
-			class="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500"
-		>
-			<svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+		<Button variant="primary" class="inline-flex items-center">
+			<svg class="mr-1.5 -ml-0.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
 				<path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
 			</svg>
-			Add Patron
-		</a>
+			<a href="/patrons/create">Add Patron</a>
+		</Button>
 	</div>
 
 	<!-- Search Section -->
-	<div class="rounded-lg bg-white p-6 shadow">
-		<h3 class="text-lg font-medium text-gray-900 mb-4">Search Patrons</h3>
+	<Card title="Search Patrons">
 		<div class="grid gap-4 md:grid-cols-3">
 			<div>
 				<label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-				<input
+				<Input
 					id="name"
-					type="text"
 					bind:value={searchName}
 					placeholder="Search by name..."
-					class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+					class="mt-1"
 				/>
 			</div>
 			<div>
 				<label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-				<input
+				<Input
 					id="email"
 					type="email"
 					bind:value={searchEmail}
 					placeholder="Search by email..."
-					class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+					class="mt-1"
 				/>
 			</div>
 			<div class="flex items-end space-x-2">
 				<div class="text-sm text-gray-500 flex items-center justify-center">
 					Showing {patrons.length} of {allPatrons.length} patrons
 				</div>
-				<button
-					type="button"
-					on:click={clearFilters}
-					class="rounded-md bg-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-200"
-				>
+				<Button variant="secondary" size="sm" on:click={clearFilters}>
 					Clear
-				</button>
+				</Button>
 			</div>
 		</div>
-	</div>
+	</Card>
 
 	{#if patrons.length === 0}
 		<div class="text-center py-12">
@@ -99,42 +86,34 @@
 			</p>
 		</div>
 	{:else}
-		<div class="overflow-hidden bg-white shadow sm:rounded-md">
-			<ul class="divide-y divide-gray-200">
-				{#each patrons as patron}
-					<li>
-						<a href="/patrons/{patron._id}" class="block hover:bg-gray-50">
-							<div class="px-4 py-4 sm:px-6">
-								<div class="flex items-center justify-between">
-									<div class="flex items-center">
-										<div class="flex-shrink-0">
-											<div class="h-10 w-10 rounded-full bg-green-500 flex items-center justify-center">
-												<span class="text-sm font-medium text-white">{patron.firstName?.[0] || 'P'}{patron.lastName?.[0] || ''}</span>
-											</div>
-										</div>
-										<div class="ml-4">
-											<p class="text-sm font-medium text-gray-900">{patron.firstName} {patron.lastName}</p>
-											<p class="text-sm text-gray-500">{patron.email}</p>
-											<p class="text-xs text-gray-400">{patron.phone}</p>
-										</div>
-									</div>
-									<div class="flex items-center space-x-2">
-										<a 
-											href="/patrons/{patron._id}/edit" 
-											class="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-										>
-											Edit
-										</a>
-										<svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-											<path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
-										</svg>
-									</div>
-								</div>
+		<div class="space-y-4">
+			{#each patrons as patron}
+				<Card clickable on:cardClick={() => window.location.href = `/patrons/${patron._id}`}>
+					<div class="flex items-center">
+						<div class="flex-shrink-0">
+							<div class="h-10 w-10 rounded-full bg-green-500 flex items-center justify-center">
+								<span class="text-sm font-medium text-white">
+									{patron.firstName?.[0] || 'P'}{patron.lastName?.[0] || ''}
+								</span>
 							</div>
-						</a>
-					</li>
-				{/each}
-			</ul>
+						</div>
+						<div class="ml-4">
+							<p class="text-sm font-medium text-gray-900">{patron.firstName} {patron.lastName}</p>
+							<p class="text-sm text-gray-500">{patron.email}</p>
+							<p class="text-xs text-gray-400">{patron.phone}</p>
+						</div>
+					</div>
+					
+					<div slot="actions" class="flex items-center space-x-2" onclick={(e) => e.stopPropagation()}>
+						<Button variant="outline" size="sm">
+							<a href="/patrons/{patron._id}/edit">Edit</a>
+						</Button>
+						<svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+							<path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+						</svg>
+					</div>
+				</Card>
+			{/each}
 		</div>
 	{/if}
 </div>

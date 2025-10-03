@@ -2,6 +2,7 @@
 	import '../app.css';
 	import { page } from '$app/stores';
 	import { goto, invalidateAll } from '$app/navigation';
+	import { Button, Badge } from '$lib/components';
 
 	let { data } = $props();
 	let user = $derived(data?.user);
@@ -94,17 +95,12 @@
 									{user.firstName}
 									{user.lastName}
 								</span>
-								<span
-									class="inline-flex items-center rounded-full bg-blue-700 px-2.5 py-0.5 text-xs font-medium text-blue-100"
-								>
+								<Badge variant={user.role === 'ADMIN' ? 'danger' : 'primary'} class="text-blue-100 bg-blue-700">
 									{user.role}
-								</span>
-								<button
-									on:click={logout}
-									class="rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600"
-								>
+								</Badge>
+								<Button variant="secondary" size="sm" on:click={logout} class="bg-blue-700 text-white hover:bg-blue-600">
 									Logout
-								</button>
+								</Button>
 							</div>
 						</div>
 					</div>
@@ -114,7 +110,8 @@
 						<button
 							type="button"
 							class="inline-flex items-center justify-center rounded-md p-2 text-blue-200 hover:bg-blue-700 hover:text-white"
-							on:click={() => (mobileMenuOpen = !mobileMenuOpen)}
+							aria-label="Toggle mobile menu"
+							onclick={() => (mobileMenuOpen = !mobileMenuOpen)}
 						>
 							<svg
 								class="h-6 w-6"
@@ -180,16 +177,15 @@
 										{user.firstName}
 										{user.lastName}
 									</div>
-									<div class="text-sm font-medium text-blue-200">{user.role}</div>
+									<Badge variant={user.role === 'ADMIN' ? 'danger' : 'primary'} size="sm" class="text-blue-200">
+										{user.role}
+									</Badge>
 								</div>
 							</div>
 							<div class="mt-3 space-y-1">
-								<button
-									on:click={logout}
-									class="block w-full px-4 py-2 text-left text-base font-medium text-white hover:bg-blue-700"
-								>
+								<Button variant="secondary" on:click={logout} class="w-full text-left bg-transparent text-white hover:bg-blue-700">
 									Logout
-								</button>
+								</Button>
 							</div>
 						</div>
 					</div>
@@ -215,12 +211,9 @@
 						</div>
 					</div>
 					<div class="flex items-center">
-						<a
-							href="/login"
-							class="rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600"
-						>
-							Login
-						</a>
+						<Button variant="secondary" size="sm" class="bg-blue-700 text-white hover:bg-blue-600">
+							<a href="/login">Login</a>
+						</Button>
 					</div>
 				</div>
 			</div>

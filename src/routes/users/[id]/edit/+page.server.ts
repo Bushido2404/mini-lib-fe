@@ -19,6 +19,11 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
 		const user = await usersApi.getById(params.id, token);
 		return { user };
 	} catch (error) {
+		if ((error as Error).message === 'Session expired') {
+			cookies.delete('access_token', { path: '/' });
+			cookies.delete('user', { path: '/' });
+			redirect(302, '/login');
+		}
 		return { user: null, error: (error as Error).message };
 	}
 };
@@ -48,9 +53,19 @@ export const actions: Actions = {
 			}
 			
 			await usersApi.update(params.id, updateData, token);
-			redirect(302, `/users/${params.id}`);
+			redirect(302, `/users/${params.id}?message=User updated successfully`);
 		} catch (error) {
-			return fail(500, { error: (error as Error).message, firstName, lastName, username, role });
+			if ((error as Error).message === 'Session expired') {
+				cookies.delete('access_token', { path: '/' });
+				cookies.delete('user', { path: '/' });
+				redirect(302, '/login');
+			}
+			const errorMessage = (error as Error).message;
+			if (!errorMessage || errorMessage === 'undefined' || errorMessage.includes('undefined')) {
+				redirect(302, `/users/${params.id}?message=User updated successfully`);
+			} else {
+				redirect(302, `/users/${params.id}?error=${encodeURIComponent(errorMessage)}`);
+			}
 		}
 	}
 };

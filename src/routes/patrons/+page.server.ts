@@ -19,6 +19,11 @@ export const load: PageServerLoad = async ({ cookies }) => {
 		const patrons = await patronsApi.getAll(token);
 		return { patrons };
 	} catch (error) {
+		if ((error as Error).message === 'Session expired') {
+			cookies.delete('access_token', { path: '/' });
+			cookies.delete('user', { path: '/' });
+			redirect(302, '/login');
+		}
 		return { patrons: [], error: (error as Error).message };
 	}
 };

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
+	import { Alert, Button, Card, Input } from '$lib/components';
 
 	let { form } = $props();
 	let loading = $state(false);
@@ -8,16 +9,16 @@
 
 <div class="space-y-6">
 	<div class="flex items-center justify-between">
-		<h1 class="text-3xl font-bold">Add New Patron</h1>
-		<a href="/patrons" class="rounded bg-gray-600 px-4 py-2 text-white hover:bg-gray-700">
-			Back to Patrons
-		</a>
+		<h1 class="text-3xl font-bold text-gray-900">Add New Patron</h1>
+		<Button variant="secondary">
+			<a href="/patrons">Back to Patrons</a>
+		</Button>
 	</div>
 
-	<div class="rounded-lg border bg-white p-6 shadow-sm">
+	<Card>
 		<form 
 			method="POST" 
-			class="space-y-4"
+			class="space-y-6"
 			use:enhance={() => {
 				loading = true;
 				return async ({ result }) => {
@@ -29,32 +30,32 @@
 			}}
 		>
 			{#if form?.error}
-				<div class="rounded bg-red-50 p-4 text-red-700">
+				<Alert variant="error" title="Error creating patron">
 					{form.error}
-				</div>
+				</Alert>
 			{/if}
 
-			<div class="grid gap-4 md:grid-cols-2">
+			<div class="grid gap-6 md:grid-cols-2">
 				<div>
 					<label for="firstName" class="block text-sm font-medium text-gray-700">First Name</label>
-					<input
+					<Input
 						id="firstName"
 						name="firstName"
 						type="text"
 						required
-						class="mt-1 block w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+						class="mt-1"
 						value={form?.firstName || ''}
 					/>
 				</div>
 
 				<div>
 					<label for="lastName" class="block text-sm font-medium text-gray-700">Last Name</label>
-					<input
+					<Input
 						id="lastName"
 						name="lastName"
 						type="text"
 						required
-						class="mt-1 block w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+						class="mt-1"
 						value={form?.lastName || ''}
 					/>
 				</div>
@@ -62,24 +63,24 @@
 
 			<div>
 				<label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-				<input
+				<Input
 					id="email"
 					name="email"
 					type="email"
 					required
-					class="mt-1 block w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+					class="mt-1"
 					value={form?.email || ''}
 				/>
 			</div>
 
 			<div>
 				<label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
-				<input
+				<Input
 					id="phone"
 					name="phone"
 					type="tel"
 					required
-					class="mt-1 block w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+					class="mt-1"
 					value={form?.phone || ''}
 				/>
 			</div>
@@ -91,22 +92,22 @@
 					name="address"
 					required
 					rows="3"
-					class="mt-1 block w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+					class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
 				>{form?.address || ''}</textarea>
 			</div>
 
-			<div class="flex gap-2">
-				<button
+			<div class="flex justify-end space-x-3">
+				<Button variant="secondary">
+					<a href="/patrons">Cancel</a>
+				</Button>
+				<Button
 					type="submit"
 					disabled={loading}
-					class="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+					variant="primary"
 				>
 					{loading ? 'Creating...' : 'Create Patron'}
-				</button>
-				<a href="/patrons" class="rounded bg-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-400">
-					Cancel
-				</a>
+				</Button>
 			</div>
 		</form>
-	</div>
+	</Card>
 </div>

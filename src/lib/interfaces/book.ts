@@ -5,6 +5,7 @@ export interface Book {
 	publicationYear: number;
 	isbn: string;
 	coverPath?: string | null;
+	coverUrl?: string;
 	createdAt: string;
 	updatedAt: string;
 }

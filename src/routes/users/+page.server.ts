@@ -5,11 +5,11 @@ import { usersApi } from '$lib/api/user';
 export const load: PageServerLoad = async ({ cookies }) => {
 	const token = cookies.get('access_token');
 	const userStr = cookies.get('user');
-	
+
 	if (!token || !userStr) {
 		redirect(302, '/login');
 	}
-	
+
 	const user = JSON.parse(userStr);
 	if (user.role !== 'ADMIN') {
 		error(403, 'Access denied');
@@ -19,6 +19,11 @@ export const load: PageServerLoad = async ({ cookies }) => {
 		const users = await usersApi.getAll(token);
 		return { users };
 	} catch (error) {
+		if ((error as Error).message === 'Session expired') {
+			cookies.delete('access_token', { path: '/' });
+			cookies.delete('user', { path: '/' });
+			redirect(302, '/login');
+		}
 		return { users: [], error: (error as Error).message };
 	}
 };

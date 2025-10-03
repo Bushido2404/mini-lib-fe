@@ -2,7 +2,8 @@
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import type { Book, Patron } from '$lib/api';
+	import type { Book, Patron } from '$lib/interfaces';
+	import { Alert, Button, Card, Input } from '$lib/components';
 
 	let { data, form } = $props();
 	const books: Book[] = data.books;
@@ -14,16 +15,16 @@
 
 <div class="space-y-6">
 	<div class="flex items-center justify-between">
-		<h1 class="text-3xl font-bold">Borrow Book</h1>
-		<a href="/loans" class="rounded bg-gray-600 px-4 py-2 text-white hover:bg-gray-700">
-			Back to Loans
-		</a>
+		<h1 class="text-3xl font-bold text-gray-900">Borrow Book</h1>
+		<Button variant="secondary">
+			<a href="/loans">Back to Loans</a>
+		</Button>
 	</div>
 
-	<div class="rounded-lg border bg-white p-6 shadow-sm">
+	<Card>
 		<form 
 			method="POST" 
-			class="space-y-4"
+			class="space-y-6"
 			use:enhance={() => {
 				loading = true;
 				return async ({ result }) => {
@@ -35,9 +36,9 @@
 			}}
 		>
 			{#if form?.error}
-				<div class="rounded bg-red-50 p-4 text-red-700">
+				<Alert variant="error" title="Error creating loan">
 					{form.error}
-				</div>
+				</Alert>
 			{/if}
 
 			<div>
@@ -46,11 +47,11 @@
 					id="bookId"
 					name="bookId"
 					required
-					class="mt-1 block w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+					class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
 				>
 					<option value="">Select a book</option>
 					{#each books as book}
-						<option value={book.id} selected={book.id === selectedBookId}>
+						<option value={book._id} selected={book._id === selectedBookId}>
 							{book.title} by {book.author}
 						</option>
 					{/each}
@@ -63,11 +64,11 @@
 					id="patronId"
 					name="patronId"
 					required
-					class="mt-1 block w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+					class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
 				>
 					<option value="">Select a patron</option>
 					{#each patrons as patron}
-						<option value={patron.id}>
+						<option value={patron._id}>
 							{patron.firstName} {patron.lastName} ({patron.email})
 						</option>
 					{/each}
@@ -76,28 +77,28 @@
 
 			<div>
 				<label for="borrowedDate" class="block text-sm font-medium text-gray-700">Borrowed Date</label>
-				<input
+				<Input
 					id="borrowedDate"
 					name="borrowedDate"
 					type="date"
 					required
-					class="mt-1 block w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+					class="mt-1"
 					value={form?.borrowedDate || new Date().toISOString().split('T')[0]}
 				/>
 			</div>
 
-			<div class="flex gap-2">
-				<button
+			<div class="flex justify-end space-x-3">
+				<Button variant="secondary">
+					<a href="/loans">Cancel</a>
+				</Button>
+				<Button
 					type="submit"
 					disabled={loading}
-					class="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+					variant="primary"
 				>
 					{loading ? 'Creating...' : 'Create Loan'}
-				</button>
-				<a href="/loans" class="rounded bg-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-400">
-					Cancel
-				</a>
+				</Button>
 			</div>
 		</form>
-	</div>
+	</Card>
 </div>

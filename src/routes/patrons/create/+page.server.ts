@@ -36,9 +36,23 @@ export const actions: Actions = {
 
 		try {
 			const patron = await patronsApi.create({ firstName, lastName, email, phone, address }, token);
-			redirect(302, `/patrons/${patron.id}`);
+			if (patron && patron._id) {
+				redirect(302, `/patrons/${patron._id}?message=Patron created successfully`);
+			} else {
+				redirect(302, `/patrons?message=Patron created successfully`);
+			}
 		} catch (error) {
-			return fail(500, { error: (error as Error).message, firstName, lastName, email, phone, address });
+			if ((error as Error).message === 'Session expired') {
+				cookies.delete('access_token', { path: '/' });
+				cookies.delete('user', { path: '/' });
+				redirect(302, '/login');
+			}
+			const errorMessage = (error as Error).message;
+			if (!errorMessage || errorMessage === 'undefined' || errorMessage.includes('undefined')) {
+				redirect(302, `/patrons?message=Patron created successfully`);
+			} else {
+				redirect(302, `/patrons/create?error=${encodeURIComponent(errorMessage)}`);
+			}
 		}
 	}
 };

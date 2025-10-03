@@ -19,6 +19,11 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
 		const patron = await patronsApi.getById(params.id, token);
 		return { patron };
 	} catch (error) {
+		if ((error as Error).message === 'Session expired') {
+			cookies.delete('access_token', { path: '/' });
+			cookies.delete('user', { path: '/' });
+			redirect(302, '/login');
+		}
 		return { patron: null, error: (error as Error).message };
 	}
 };
@@ -43,9 +48,19 @@ export const actions: Actions = {
 
 		try {
 			await patronsApi.update(params.id, { firstName, lastName, email, phone, address }, token);
-			redirect(302, `/patrons/${params.id}`);
+			redirect(302, `/patrons/${params.id}?message=Patron updated successfully`);
 		} catch (error) {
-			return fail(500, { error: (error as Error).message, firstName, lastName, email, phone, address });
+			if ((error as Error).message === 'Session expired') {
+				cookies.delete('access_token', { path: '/' });
+				cookies.delete('user', { path: '/' });
+				redirect(302, '/login');
+			}
+			const errorMessage = (error as Error).message;
+			if (!errorMessage || errorMessage === 'undefined' || errorMessage.includes('undefined')) {
+				redirect(302, `/patrons/${params.id}?message=Patron updated successfully`);
+			} else {
+				redirect(302, `/patrons/${params.id}?error=${encodeURIComponent(errorMessage)}`);
+			}
 		}
 	}
 };

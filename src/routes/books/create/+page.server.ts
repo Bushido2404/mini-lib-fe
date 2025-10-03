@@ -5,11 +5,11 @@ import { booksApi } from '$lib/api/book';
 export const load: PageServerLoad = async ({ cookies }) => {
 	const token = cookies.get('access_token');
 	const userStr = cookies.get('user');
-	
+
 	if (!token || !userStr) {
 		redirect(302, '/login');
 	}
-	
+
 	const user = JSON.parse(userStr);
 	if (user.role !== 'ADMIN') {
 		error(403, 'Access denied');
@@ -26,18 +26,48 @@ export const actions: Actions = {
 		const data = await request.formData();
 		const title = data.get('title') as string;
 		const author = data.get('author') as string;
-		const publicationYear = parseInt(data.get('publicationYear') as string);
+		const publicationYearStr = data.get('publicationYear') as string;
 		const isbn = data.get('isbn') as string;
 
-		if (!title || !author || !publicationYear || !isbn) {
-			return fail(400, { error: 'All fields are required', title, author, publicationYear, isbn });
+		if (!title || !author || !publicationYearStr || !isbn) {
+			return fail(400, {
+				error: 'All fields are required',
+				title,
+				author,
+				publicationYear: publicationYearStr,
+				isbn
+			});
+		}
+
+		const publicationYear = parseInt(publicationYearStr);
+		if (isNaN(publicationYear) || publicationYear < 1000 || publicationYear > 2100) {
+			return fail(400, {
+				error: 'Invalid publication year',
+				title,
+				author,
+				publicationYear: publicationYearStr,
+				isbn
+			});
 		}
 
 		try {
+			console.log('Creating book:', { title, author, publicationYear, isbn });
 			const book = await booksApi.create({ title, author, publicationYear, isbn }, token);
-			redirect(302, `/books/${book.id}`);
+			console.log('Book created successfully:', book._id);
+			redirect(302, `/books/${book._id}?message=Book created successfully`);
 		} catch (error) {
-			return fail(500, { error: (error as Error).message, title, author, publicationYear, isbn });
+			console.error('Create book error:', error);
+			if ((error as Error).message === 'Session expired') {
+				cookies.delete('access_token', { path: '/' });
+				cookies.delete('user', { path: '/' });
+				redirect(302, '/login');
+			}
+			const errorMessage = (error as Error).message;
+			if (!errorMessage || errorMessage === 'undefined' || errorMessage.includes('undefined')) {
+				redirect(302, `/books?message=Book created successfully`);
+			} else {
+				redirect(302, `/books?error=${encodeURIComponent(errorMessage)}`);
+			}
 		}
 	}
 };

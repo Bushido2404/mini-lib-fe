@@ -3,7 +3,7 @@ import type { LayoutServerLoad } from './$types';
 export const load: LayoutServerLoad = async ({ cookies, url }) => {
 	const token = cookies.get('access_token');
 	const userStr = cookies.get('user');
-	
+
 	// Allow access to login page without token
 	if (url.pathname === '/login') {
 		return { user: null };

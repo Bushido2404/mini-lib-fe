@@ -1,9 +1,12 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import type { Book } from '$lib/interfaces';
+	import { Notification } from '$lib/components';
 
 	let { data } = $props();
-	const book: Book = data.book;
+	const book: Book | null = data.book;
 	const user = data.user;
+	let deleting = $state(false);
 
 	let showCoverUpload = $state(false);
 	let uploadFile: File | null = $state(null);
@@ -24,7 +27,7 @@
 			const formData = new FormData();
 			formData.append('cover', uploadFile);
 
-			const response = await fetch(`/books/${book.id}/upload-cover`, {
+			const response = await fetch(`/books/${book._id}/upload-cover`, {
 				method: 'POST',
 				body: formData
 			});
@@ -42,6 +45,15 @@
 </script>
 
 <div class="space-y-6">
+	<Notification />
+	
+	{#if !book}
+		<div class="text-center py-12">
+			<h1 class="text-2xl font-bold text-gray-900">Book not found</h1>
+			<p class="mt-2 text-gray-600">The book you're looking for doesn't exist or has been deleted.</p>
+			<a href="/books" class="mt-4 inline-block rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Back to Books</a>
+		</div>
+	{:else}
 	<div class="flex items-center justify-between">
 		<h1 class="text-3xl font-bold text-gray-900">{book.title}</h1>
 		<div class="flex space-x-3">
@@ -53,11 +65,36 @@
 			</a>
 			{#if user?.role === 'ADMIN'}
 				<a
-					href="/books/{book.id}/edit"
+					href="/books/{book._id}/edit"
 					class="inline-flex items-center rounded-md bg-yellow-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-yellow-500"
 				>
 					Edit Book
 				</a>
+				<form 
+					method="POST" 
+					action="?/delete" 
+					class="inline" 
+					use:enhance={() => {
+						if (!confirm('Are you sure you want to delete this book?')) {
+							return ({ cancel }) => cancel();
+						}
+						deleting = true;
+						return async ({ result }) => {
+							deleting = false;
+							if (result.type === 'failure') {
+								console.error('Delete failed:', result.data);
+							}
+						};
+					}}
+				>
+					<button 
+						type="submit" 
+						disabled={deleting}
+						class="inline-flex items-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 disabled:opacity-50"
+					>
+						{deleting ? 'Deleting...' : 'Delete Book'}
+					</button>
+				</form>
 			{/if}
 		</div>
 	</div>
@@ -154,7 +191,7 @@
 							<h3 class="text-lg font-medium text-gray-900">Actions</h3>
 							<div class="mt-4 flex space-x-3">
 								<a
-									href="/loans/create?bookId={book.id}"
+									href="/loans/create?bookId={book._id}"
 									class="inline-flex items-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500"
 								>
 									<svg class="mr-1.5 -ml-0.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -190,4 +227,5 @@
 			</div>
 		</div>
 	</div>
+	{/if}
 </div>

@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import type { Loan } from '$lib/api';
+	import type { Loan } from '$lib/interfaces';
+	import { Alert, Button, Card, Input, Notification } from '$lib/components';
 
 	let { data, form } = $props();
 	const loan: Loan = data.loan;
@@ -9,24 +10,43 @@
 </script>
 
 <div class="space-y-6">
+	<Notification />
+	
+	{#if data.error}
+		<Alert variant="error" title="Error loading loan">
+			{data.error}
+		</Alert>
+	{/if}
+
 	<div class="flex items-center justify-between">
-		<h1 class="text-3xl font-bold">Return Book</h1>
-		<a href="/loans/{loan.id}" class="rounded bg-gray-600 px-4 py-2 text-white hover:bg-gray-700">
-			Back to Loan
-		</a>
+		<h1 class="text-3xl font-bold text-gray-900">Return Book</h1>
+		<Button variant="secondary">
+			<a href="/loans/{loan._id}">Back to Loan</a>
+		</Button>
 	</div>
 
-	<div class="rounded-lg border bg-white p-6 shadow-sm">
-		<div class="mb-6 space-y-2">
-			<h3 class="text-lg font-semibold">Loan Information</h3>
-			<p><strong>Book:</strong> {loan.book?.title} by {loan.book?.author}</p>
-			<p><strong>Patron:</strong> {loan.patron?.firstName} {loan.patron?.lastName}</p>
-			<p><strong>Borrowed Date:</strong> {new Date(loan.borrowedDate).toLocaleDateString()}</p>
+	<Card>
+		<div class="mb-6">
+			<h3 class="text-lg font-semibold text-gray-900 mb-4">Loan Information</h3>
+			<div class="bg-gray-50 rounded-lg p-4 space-y-2">
+				<div class="flex justify-between">
+					<span class="font-medium text-gray-700">Book:</span>
+					<span class="text-gray-900">{loan.bookId.title} by {loan.bookId.author}</span>
+				</div>
+				<div class="flex justify-between">
+					<span class="font-medium text-gray-700">Patron:</span>
+					<span class="text-gray-900">{loan.patronId.firstName} {loan.patronId.lastName}</span>
+				</div>
+				<div class="flex justify-between">
+					<span class="font-medium text-gray-700">Borrowed Date:</span>
+					<span class="text-gray-900">{new Date(loan.borrowedDate).toLocaleDateString()}</span>
+				</div>
+			</div>
 		</div>
 
 		<form 
 			method="POST" 
-			class="space-y-4"
+			class="space-y-6"
 			use:enhance={() => {
 				loading = true;
 				return async ({ result }) => {
@@ -38,35 +58,35 @@
 			}}
 		>
 			{#if form?.error}
-				<div class="rounded bg-red-50 p-4 text-red-700">
+				<Alert variant="error" title="Error returning book">
 					{form.error}
-				</div>
+				</Alert>
 			{/if}
 
 			<div>
 				<label for="returnDate" class="block text-sm font-medium text-gray-700">Return Date</label>
-				<input
+				<Input
 					id="returnDate"
 					name="returnDate"
 					type="date"
 					required
-					class="mt-1 block w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+					class="mt-1"
 					value={form?.returnDate || new Date().toISOString().split('T')[0]}
 				/>
 			</div>
 
-			<div class="flex gap-2">
-				<button
+			<div class="flex justify-end space-x-3">
+				<Button variant="secondary">
+					<a href="/loans/{loan._id}">Cancel</a>
+				</Button>
+				<Button
 					type="submit"
 					disabled={loading}
-					class="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:opacity-50"
+					variant="primary"
 				>
 					{loading ? 'Processing...' : 'Mark as Returned'}
-				</button>
-				<a href="/loans/{loan.id}" class="rounded bg-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-400">
-					Cancel
-				</a>
+				</Button>
 			</div>
 		</form>
-	</div>
+	</Card>
 </div>

@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import type { Book } from '$lib/interfaces';
 	import { filterBooks } from '$lib/api/book';
+	import { Alert, Button, Input, Card, Notification } from '$lib/components';
 
 	let { data } = $props();
 	const allBooks: Book[] = data.books;
@@ -28,84 +29,69 @@
 </script>
 
 <div class="space-y-6">
+	<Notification />
+	
 	{#if data.error}
-		<div class="rounded-md bg-red-50 p-4">
-			<div class="flex">
-				<svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-					<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
-				</svg>
-				<div class="ml-3">
-					<h3 class="text-sm font-medium text-red-800">Error loading books</h3>
-					<p class="mt-1 text-sm text-red-700">{data.error}</p>
-				</div>
-			</div>
-		</div>
+		<Alert variant="error" title="Error loading books">
+			{data.error}
+		</Alert>
 	{/if}
+	
 	<div class="flex items-center justify-between">
 		<h1 class="text-3xl font-bold text-gray-900">Books</h1>
 		{#if user?.role === 'ADMIN'}
-			<a
-				href="/books/create"
-				class="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500"
-			>
+			<Button variant="primary" class="inline-flex items-center">
 				<svg class="mr-1.5 -ml-0.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
 					<path
 						d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"
 					/>
 				</svg>
-				Add Book
-			</a>
+				<a href="/books/create">Add Book</a>
+			</Button>
 		{/if}
 	</div>
 
 	<!-- Search and Filter Section -->
-	<div class="rounded-lg bg-white p-6 shadow">
-		<h3 class="mb-4 text-lg font-medium text-gray-900">Search & Filter</h3>
+	<Card title="Search & Filter">
 		<div class="grid gap-4 md:grid-cols-4">
 			<div>
 				<label for="title" class="block text-sm font-medium text-gray-700">Title</label>
-				<input
+				<Input
 					id="title"
-					type="text"
 					bind:value={searchTitle}
 					placeholder="Search by title..."
-					class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+					class="mt-1"
 				/>
 			</div>
 			<div>
 				<label for="author" class="block text-sm font-medium text-gray-700">Author</label>
-				<input
+				<Input
 					id="author"
-					type="text"
 					bind:value={searchAuthor}
 					placeholder="Search by author..."
-					class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+					class="mt-1"
 				/>
 			</div>
 			<div>
 				<label for="year" class="block text-sm font-medium text-gray-700">Publication Year</label>
-				<input
+				<Input
 					id="year"
 					type="number"
 					bind:value={searchYear}
 					placeholder="e.g. 2023"
-					class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+					class="mt-1"
 				/>
 			</div>
 			<div class="flex items-end space-x-2">
 				<div class="flex items-center justify-center text-sm text-gray-500">
 					Showing {books.length} of {allBooks.length} books
 				</div>
-				<button
-					type="button"
-					on:click={clearFilters}
-					class="rounded-md bg-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-200"
-				>
+				<Button variant="secondary" size="sm" on:click={clearFilters}>
 					Clear
-				</button>
+				</Button>
 			</div>
 		</div>
-	</div>
+	</Card>
 
 	{#if books.length === 0}
 		<div class="py-12 text-center">
@@ -132,9 +118,7 @@
 	{:else}
 		<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 			{#each books as book}
-				<div
-					class="group relative rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
-				>
+				<Card clickable on:cardClick={() => window.location.href = `/books/${book._id}`}>
 					{#if book.coverPath}
 						<div class="aspect-h-3 aspect-w-2 mb-4 overflow-hidden rounded-lg">
 							<img
@@ -171,32 +155,23 @@
 					<p class="mb-1 text-sm text-gray-600">by {book.author}</p>
 					<p class="mb-1 text-sm text-gray-500">Published: {book.publicationYear}</p>
 					<p class="mb-4 text-xs text-gray-400">ISBN: {book.isbn}</p>
-
-					<div class="flex flex-wrap gap-2">
-						<a
-							href="/books/{book._id}"
-							class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100"
-						>
-							View Details
-						</a>
+					
+					<div slot="actions" class="flex flex-wrap gap-2" onclick={(e) => e.stopPropagation()}>
+						<Button variant="outline" size="sm">
+							<a href="/books/{book._id}">View Details</a>
+						</Button>
 						{#if user?.role === 'USER'}
-							<a
-								href="/loans/create?bookId={book._id}"
-								class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 hover:bg-green-100"
-							>
-								Borrow
-							</a>
+							<Button variant="primary" size="sm">
+								<a href="/loans/create?bookId={book._id}">Borrow</a>
+							</Button>
 						{/if}
 						{#if user?.role === 'ADMIN'}
-							<a
-								href="/books/{book._id}/edit"
-								class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 hover:bg-yellow-100"
-							>
-								Edit
-							</a>
+							<Button variant="secondary" size="sm">
+								<a href="/books/{book._id}/edit">Edit</a>
+							</Button>
 						{/if}
 					</div>
-				</div>
+				</Card>
 			{/each}
 		</div>
 	{/if}

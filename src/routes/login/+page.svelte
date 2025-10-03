@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
+	import { Alert, Button, Input, Card } from '$lib/components';
 
 	let { form } = $props();
 	let loading = $state(false);
@@ -13,59 +14,51 @@
 			<p class="mt-2 text-gray-600">Sign in to your account</p>
 		</div>
 
-		<form
-			method="POST"
-			class="space-y-6"
-			use:enhance={() => {
-				loading = true;
-				return async ({ result, update }) => {
-					loading = false;
-					if (result.type === 'redirect') {
-						await invalidateAll();
-						goto(result.location);
-					} else {
-						await update();
-					}
-				};
-			}}
-		>
-			{#if form?.error}
-				<div class="rounded bg-red-50 p-4 text-red-700">
-					{form.error}
-				</div>
-			{/if}
-
-			<div>
-				<label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-				<input
-					id="username"
-					name="username"
-					type="text"
-					required
-					class="mt-1 block w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-					value={form?.username || ''}
-				/>
-			</div>
-
-			<div>
-				<label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-				<input
-					id="password"
-					name="password"
-					type="password"
-					required
-					class="mt-1 block w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-				/>
-			</div>
-
-			<button
-				type="submit"
-				disabled={loading}
-				class="w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+		<Card>
+			<form
+				method="POST"
+				class="space-y-6"
+				use:enhance={() => {
+					loading = true;
+					return async ({ result, update }) => {
+						loading = false;
+						if (result.type === 'redirect') {
+							await invalidateAll();
+							goto(result.location);
+						} else {
+							await update();
+						}
+					};
+				}}
 			>
-				{loading ? 'Signing in...' : 'Sign in'}
-			</button>
-		</form>
+				{#if form?.error}
+					<Alert variant="error">
+						{form.error}
+					</Alert>
+				{/if}
+
+				<div>
+					<label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+					<Input
+						id="username"
+						name="username"
+						type="text"
+						required
+						value={form?.username || ''}
+						class="mt-1"
+					/>
+				</div>
+
+				<div>
+					<label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+					<Input id="password" name="password" type="password" required class="mt-1" />
+				</div>
+
+				<Button type="submit" variant="primary" disabled={loading} class="w-full">
+					{loading ? 'Signing in...' : 'Sign in'}
+				</Button>
+			</form>
+		</Card>
 
 		<div class="text-center text-sm text-gray-600">
 			<p>Guest access: Browse books without login</p>

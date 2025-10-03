@@ -1,1 +1,1 @@
-<!-- This page redirects to /books -->
+<!-- Root page redirects to /books via server -->
