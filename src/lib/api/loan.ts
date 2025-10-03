@@ -1,33 +1,5 @@
-import { PUBLIC_API_URL } from '$env/static/public';
 import type { Loan } from '$lib/interfaces';
-
-const API_BASE = PUBLIC_API_URL;
-
-async function apiCall(endpoint: string, options: RequestInit = {}, token?: string) {
-	const headers: Record<string, string> = {
-		...(options.headers as Record<string, string>)
-	};
-
-	if (token) {
-		headers.Authorization = `Bearer ${token}`;
-	}
-
-	if (options.body && typeof options.body === 'string') {
-		headers['Content-Type'] = 'application/json';
-	}
-
-	const response = await fetch(`${API_BASE}${endpoint}`, {
-		...options,
-		headers
-	});
-
-	if (!response.ok) {
-		const errorData = await response.json().catch(() => ({}));
-		throw new Error(errorData.message || `API Error: ${response.status} ${response.statusText}`);
-	}
-
-	return response.json();
-}
+import { apiCall } from './base';
 
 export const loansApi = {
 	getAll: (token: string): Promise<Loan[]> => apiCall('/loans', { method: 'GET' }, token),
