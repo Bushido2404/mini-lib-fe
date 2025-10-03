@@ -1,6 +1,6 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { patronsApi } from '$lib/api';
+import { patronsApi } from '$lib/api/patron';
 
 export const load: PageServerLoad = async ({ params, cookies }) => {
 	const token = cookies.get('access_token');
@@ -18,7 +18,7 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
 	try {
 		const patron = await patronsApi.getById(params.id, token);
 		return { patron };
-	} catch (err) {
-		error(404, 'Patron not found');
+	} catch (error) {
+		return { patron: null, error: (error as Error).message };
 	}
 };

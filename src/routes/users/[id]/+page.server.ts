@@ -1,6 +1,6 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { usersApi } from '$lib/api';
+import { usersApi } from '$lib/api/user';
 
 export const load: PageServerLoad = async ({ params, cookies }) => {
 	const token = cookies.get('access_token');
@@ -18,7 +18,7 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
 	try {
 		const user = await usersApi.getById(params.id, token);
 		return { user };
-	} catch (err) {
-		error(404, 'User not found');
+	} catch (error) {
+		return { user: null, error: (error as Error).message };
 	}
 };

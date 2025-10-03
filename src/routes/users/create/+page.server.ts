@@ -1,6 +1,6 @@
 import { redirect, fail, error } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { usersApi } from '$lib/api';
+import { usersApi } from '$lib/api/user';
 
 export const load: PageServerLoad = async ({ cookies }) => {
 	const token = cookies.get('access_token');
@@ -37,8 +37,8 @@ export const actions: Actions = {
 		try {
 			const user = await usersApi.create({ firstName, lastName, username, password, role }, token);
 			redirect(302, `/users/${user.id}`);
-		} catch (err) {
-			return fail(500, { error: 'Failed to create user', firstName, lastName, username, role });
+		} catch (error) {
+			return fail(500, { error: (error as Error).message, firstName, lastName, username, role });
 		}
 	}
 };

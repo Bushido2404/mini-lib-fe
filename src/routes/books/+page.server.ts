@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { booksApi } from '$lib/api';
+import { booksApi } from '$lib/api/book';
 
 export const load: PageServerLoad = async ({ cookies }) => {
 	const token = cookies.get('access_token');

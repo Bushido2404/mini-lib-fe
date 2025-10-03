@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { loansApi } from '$lib/api';
+import { loansApi } from '$lib/api/loan';
 
 export const load: PageServerLoad = async ({ cookies }) => {
 	const token = cookies.get('access_token');
@@ -13,8 +13,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
 	try {
 		const loans = await loansApi.getAll(token);
 		return { loans };
-	} catch (err) {
-		console.error('Failed to fetch loans:', err);
-		return { loans: [] };
+	} catch (error) {
+		return { loans: [], error: (error as Error).message };
 	}
 };

@@ -1,6 +1,6 @@
 import { redirect, fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
-import { authApi } from '$lib/api';
+import { authApi } from '$lib/api/auth';
 
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
@@ -30,10 +30,20 @@ export const actions: Actions = {
 				sameSite: 'strict',
 				maxAge: 60 * 60 * 24 * 7 // 7 days
 			});
-
-			redirect(302, '/books');
 		} catch (error) {
-			return fail(401, { error: `Invalid username or password: ${error}`, username });
+			let errorMessage = 'Invalid username or password';
+
+			if (error instanceof Error) {
+				errorMessage = error.message;
+			} else if (typeof error === 'string') {
+				errorMessage = error;
+			} else if (error && typeof error === 'object') {
+				errorMessage = JSON.stringify(error);
+			}
+
+			return fail(401, { error: errorMessage, username });
 		}
+
+		redirect(302, '/books');
 	}
 };

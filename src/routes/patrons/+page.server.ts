@@ -1,6 +1,6 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { patronsApi } from '$lib/api';
+import { patronsApi } from '$lib/api/patron';
 
 export const load: PageServerLoad = async ({ cookies }) => {
 	const token = cookies.get('access_token');
@@ -18,8 +18,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
 	try {
 		const patrons = await patronsApi.getAll(token);
 		return { patrons };
-	} catch (err) {
-		console.error('Failed to fetch patrons:', err);
-		return { patrons: [] };
+	} catch (error) {
+		return { patrons: [], error: (error as Error).message };
 	}
 };

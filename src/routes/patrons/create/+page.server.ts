@@ -1,6 +1,6 @@
 import { redirect, fail, error } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { patronsApi } from '$lib/api';
+import { patronsApi } from '$lib/api/patron';
 
 export const load: PageServerLoad = async ({ cookies }) => {
 	const token = cookies.get('access_token');
@@ -37,8 +37,8 @@ export const actions: Actions = {
 		try {
 			const patron = await patronsApi.create({ firstName, lastName, email, phone, address }, token);
 			redirect(302, `/patrons/${patron.id}`);
-		} catch (err) {
-			return fail(500, { error: 'Failed to create patron', firstName, lastName, email, phone, address });
+		} catch (error) {
+			return fail(500, { error: (error as Error).message, firstName, lastName, email, phone, address });
 		}
 	}
 };

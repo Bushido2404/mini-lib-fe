@@ -1,6 +1,6 @@
 import { redirect, fail, error } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { booksApi } from '$lib/api';
+import { booksApi } from '$lib/api/book';
 
 export const load: PageServerLoad = async ({ params, cookies }) => {
 	const token = cookies.get('access_token');
@@ -18,8 +18,8 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
 	try {
 		const book = await booksApi.getById(params.id, token);
 		return { book };
-	} catch (err) {
-		error(404, 'Book not found');
+	} catch (error) {
+		return { book: null, error: (error as Error).message };
 	}
 };
 
@@ -43,8 +43,8 @@ export const actions: Actions = {
 		try {
 			await booksApi.update(params.id, { title, author, publicationYear, isbn }, token);
 			redirect(302, `/books/${params.id}`);
-		} catch (err) {
-			return fail(500, { error: 'Failed to update book', title, author, publicationYear, isbn });
+		} catch (error) {
+			return fail(500, { error: (error as Error).message, title, author, publicationYear, isbn });
 		}
 	}
 };

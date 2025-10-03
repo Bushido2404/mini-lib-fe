@@ -1,6 +1,8 @@
 import { redirect, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { loansApi, booksApi, patronsApi } from '$lib/api';
+import { loansApi } from '$lib/api/loan';
+import { booksApi } from '$lib/api/book';
+import { patronsApi } from '$lib/api/patron';
 
 export const load: PageServerLoad = async ({ cookies }) => {
 	const token = cookies.get('access_token');
@@ -16,8 +18,8 @@ export const load: PageServerLoad = async ({ cookies }) => {
 			patronsApi.getAll(token)
 		]);
 		return { books, patrons };
-	} catch (err) {
-		return { books: [], patrons: [] };
+	} catch (error) {
+		return { books: [], patrons: [], error: (error as Error).message };
 	}
 };
 
@@ -44,8 +46,8 @@ export const actions: Actions = {
 				borrowedDate: new Date(borrowedDate).toISOString() 
 			}, token);
 			redirect(302, `/loans/${loan.id}`);
-		} catch (err) {
-			return fail(500, { error: 'Failed to create loan', bookId, patronId, borrowedDate });
+		} catch (error) {
+			return fail(500, { error: (error as Error).message, bookId, patronId, borrowedDate });
 		}
 	}
 };

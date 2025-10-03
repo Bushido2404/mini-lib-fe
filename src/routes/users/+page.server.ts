@@ -1,6 +1,6 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { usersApi } from '$lib/api';
+import { usersApi } from '$lib/api/user';
 
 export const load: PageServerLoad = async ({ cookies }) => {
 	const token = cookies.get('access_token');
@@ -18,8 +18,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
 	try {
 		const users = await usersApi.getAll(token);
 		return { users };
-	} catch (err) {
-		console.error('Failed to fetch users:', err);
-		return { users: [] };
+	} catch (error) {
+		return { users: [], error: (error as Error).message };
 	}
 };

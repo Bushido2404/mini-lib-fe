@@ -1,6 +1,6 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { loansApi } from '$lib/api';
+import { loansApi } from '$lib/api/loan';
 
 export const load: PageServerLoad = async ({ params, cookies }) => {
 	const token = cookies.get('access_token');
@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
 	try {
 		const loan = await loansApi.getById(params.id, token);
 		return { loan };
-	} catch (err) {
-		error(404, 'Loan not found');
+	} catch (error) {
+		return { loan: null, error: (error as Error).message };
 	}
 };

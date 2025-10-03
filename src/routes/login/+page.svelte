@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 
 	let { form } = $props();
 	let loading = $state(false);
@@ -13,15 +13,18 @@
 			<p class="mt-2 text-gray-600">Sign in to your account</p>
 		</div>
 
-		<form 
-			method="POST" 
+		<form
+			method="POST"
 			class="space-y-6"
 			use:enhance={() => {
 				loading = true;
-				return async ({ result }) => {
+				return async ({ result, update }) => {
 					loading = false;
 					if (result.type === 'redirect') {
+						await invalidateAll();
 						goto(result.location);
+					} else {
+						await update();
 					}
 				};
 			}}
@@ -39,7 +42,7 @@
 					name="username"
 					type="text"
 					required
-					class="mt-1 block w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+					class="mt-1 block w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
 					value={form?.username || ''}
 				/>
 			</div>
@@ -51,7 +54,7 @@
 					name="password"
 					type="password"
 					required
-					class="mt-1 block w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+					class="mt-1 block w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
 				/>
 			</div>
 

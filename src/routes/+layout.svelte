@@ -1,14 +1,17 @@
 <script lang="ts">
 	import '../app.css';
 	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 
 	let { data } = $props();
-	const user = data?.user;
+	let user = $derived(data?.user);
 
-	async function logout() {
-		await fetch('/logout', { method: 'POST' });
-		goto('/login');
+	function logout() {
+		const form = document.createElement('form');
+		form.method = 'POST';
+		form.action = '/logout';
+		document.body.appendChild(form);
+		form.submit();
 	}
 
 	let mobileMenuOpen = $state(false);

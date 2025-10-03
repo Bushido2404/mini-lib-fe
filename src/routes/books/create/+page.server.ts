@@ -1,6 +1,6 @@
 import { redirect, fail, error } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { booksApi } from '$lib/api';
+import { booksApi } from '$lib/api/book';
 
 export const load: PageServerLoad = async ({ cookies }) => {
 	const token = cookies.get('access_token');
@@ -36,8 +36,8 @@ export const actions: Actions = {
 		try {
 			const book = await booksApi.create({ title, author, publicationYear, isbn }, token);
 			redirect(302, `/books/${book.id}`);
-		} catch (err) {
-			return fail(500, { error: 'Failed to create book', title, author, publicationYear, isbn });
+		} catch (error) {
+			return fail(500, { error: (error as Error).message, title, author, publicationYear, isbn });
 		}
 	}
 };

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { Book } from '$lib/api';
-	import { filterBooks } from '$lib/api';
+	import type { Book } from '$lib/interfaces';
+	import { filterBooks } from '$lib/api/book';
 
 	let { data } = $props();
 	const allBooks: Book[] = data.books;
@@ -28,6 +28,19 @@
 </script>
 
 <div class="space-y-6">
+	{#if data.error}
+		<div class="rounded-md bg-red-50 p-4">
+			<div class="flex">
+				<svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+					<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+				</svg>
+				<div class="ml-3">
+					<h3 class="text-sm font-medium text-red-800">Error loading books</h3>
+					<p class="mt-1 text-sm text-red-700">{data.error}</p>
+				</div>
+			</div>
+		</div>
+	{/if}
 	<div class="flex items-center justify-between">
 		<h1 class="text-3xl font-bold text-gray-900">Books</h1>
 		{#if user?.role === 'ADMIN'}
